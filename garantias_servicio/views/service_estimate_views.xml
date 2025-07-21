@@ -1,0 +1,94 @@
+<!--
+Archivo: service_estimate_views.xml
+Descripción: Vistas para la gestión de presupuestos de servicio técnico en Odoo 18.
+Incluye vistas de lista, formulario, búsqueda y menú para el modelo service.estimate.
+Cada sección está documentada para facilitar el mantenimiento y la comprensión del flujo de trabajo.
+-->
+<odoo>
+    <!-- Vista de lista para mostrar los presupuestos de servicio técnico -->
+    <record id="view_service_estimate_list" model="ir.ui.view">
+        <field name="name">service.estimate.list</field>
+        <field name="model">service.estimate</field>
+        <field name="arch" type="xml">
+            <!-- Campos principales en la vista de lista -->
+            <list string="Presupuestos">
+                <field name="name"/><!-- Cédula del propietario -->
+                <field name="date"/><!-- Fecha del presupuesto -->
+                <field name="equipment_id"/><!-- Equipo asociado -->
+                <field name="customer_id"/><!-- Cliente -->
+                <field name="state" widget="badge"/><!-- Estado -->
+                <field name="total_amount"/><!-- Total -->
+            </list>
+        </field>
+    </record>
+
+    <!-- Vista de formulario para editar y visualizar presupuestos -->
+    <record id="view_service_estimate_form" model="ir.ui.view">
+        <field name="name">service.estimate.form</field>
+        <field name="model">service.estimate</field>
+        <field name="arch" type="xml">
+            <form string="Presupuesto de Servicio Técnico">
+                <!-- Barra de estado y botones de acción -->
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,done,canceled"/>
+                    <button name="action_confirm" string="Confirmar" type="object" class="oe_highlight" if="state == 'draft'"/><!-- Confirma el presupuesto -->
+                    <button name="action_done" string="Marcar como Realizado" type="object" class="oe_highlight" if="state == 'confirmed'"/><!-- Marca como realizado -->
+                    <button name="action_cancel" string="Cancelar" type="object" if="state in ['draft', 'confirmed']"/><!-- Cancela el presupuesto -->
+                    <button name="action_draft" string="Volver a Borrador" type="object" if="state in ['confirmed', 'done', 'canceled']"/><!-- Vuelve a estado borrador -->
+                </header>
+                <sheet>
+                    <!-- Agrupación de campos principales -->
+                    <group>
+                        <group>
+                            <field name="name"/><!-- Cédula del propietario -->
+                            <field name="date"/><!-- Fecha del presupuesto -->
+                            <field name="equipment_id"/><!-- Equipo asociado -->
+                            <field name="customer_id"/><!-- Cliente -->
+                        </group>
+                        <group>
+                            <field name="state"/><!-- Estado -->
+                            <field name="total_amount"/><!-- Total -->
+                        </group>
+                    </group>
+                    <!-- Líneas de presupuesto -->
+                    <field name="estimate_line_ids">
+                        <list editable="bottom">
+                            <field name="product_id"/><!-- Producto/Servicio -->
+                            <field name="description"/><!-- Descripción -->
+                            <field name="quantity"/><!-- Cantidad -->
+                            <field name="unit_price"/><!-- Precio unitario -->
+                            <field name="subtotal"/><!-- Subtotal -->
+                        </list>
+                    </field>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Vista de búsqueda para filtrar presupuestos -->
+    <record id="view_service_estimate_search" model="ir.ui.view">
+        <field name="name">service.estimate.search</field>
+        <field name="model">service.estimate</field>
+        <field name="arch" type="xml">
+            <search string="Buscar Presupuestos">
+                <field name="name"/><!-- Cédula del propietario -->
+                <field name="equipment_id"/><!-- Equipo -->
+                <field name="customer_id"/><!-- Cliente -->
+                <!-- Filtros por estado -->
+                <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Confirmados" name="confirmed" domain="[('state', '=', 'confirmed')]"/>
+                <filter string="Realizados" name="done" domain="[('state', '=', 'done')]"/>
+                <filter string="Cancelados" name="canceled" domain="[('state', '=', 'canceled')]"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- Acción para abrir la vista de presupuestos -->
+    <record id="action_service_estimate" model="ir.actions.act_window">
+        <field name="name">Presupuestos</field>
+        <field name="res_model">service.estimate</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    <!-- Menú principal para acceder a los presupuestos -->
+    <menuitem id="menu_technical_service_estimates" name="Presupuestos" parent="menu_technical_service_root" action="action_service_estimate"/>
+</odoo>
