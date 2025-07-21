@@ -1,1 +1,0 @@
-# garantias-odoo18
