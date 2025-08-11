@@ -1,57 +1,45 @@
-<!--
-Archivo: technical_service_views.xml
-Descripción: Vistas para la gestión de equipos de servicio técnico en Odoo 18.
-Incluye vistas de lista, formulario, búsqueda y menú para el modelo technical.service.equipment.
-Cada sección está documentada para facilitar el mantenimiento y la comprensión del flujo de trabajo.
--->
 <odoo>
-    <!-- Vista de lista para mostrar los equipos de servicio técnico -->
     <record id="view_technical_service_equipment_list" model="ir.ui.view">
         <field name="name">technical.service.equipment.list</field>
         <field name="model">technical.service.equipment</field>
         <field name="arch" type="xml">
-            <!-- Campos principales en la vista de lista -->
             <list string="Equipos de Servicio Técnico" decoration-info="under_warranty==True" decoration-danger="state=='scrapped'">
-                <field name="name"/><!-- Referencia del equipo -->
-                <field name="product_id"/><!-- Producto asociado -->
-                <field name="customer_id"/><!-- Cliente -->
-                <field name="entry_date"/><!-- Fecha de ingreso -->
-                <field name="delivery_date"/><!-- Fecha de entrega -->
-                <field name="state" widget="badge"/><!-- Estado -->
-                <field name="under_warranty" invisible="1"/><!-- Indicador de garantía -->
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="customer_id"/>
+                <field name="entry_date"/>
+                <field name="delivery_date"/>
+                <field name="state" widget="badge"/>
+                <field name="under_warranty" invisible="1"/>
             </list>
         </field>
     </record>
 
-    <!-- Vista de formulario para editar y visualizar equipos -->
     <record id="view_technical_service_equipment_form" model="ir.ui.view">
         <field name="name">technical.service.equipment.form</field>
         <field name="model">technical.service.equipment</field>
         <field name="arch" type="xml">
             <form string="Equipo de Servicio Técnico">
-                <!-- Barra de estado y botones de acción -->
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,repair,scrapped,delivered"/><!-- Estado del equipo -->
-                    <button name="action_confirm_repair" string="Confirmar Reparación" type="object" class="oe_highlight" if="state == 'draft'"/><!-- Confirma reparación -->
-                    <button name="action_scrap" string="Dar de Baja" type="object" class="oe_highlight" if="state in ['draft', 'repair']"/><!-- Da de baja el equipo -->
-                    <button name="action_deliver" string="Entregar" type="object" class="oe_highlight" if="state in ['draft', 'repair']"/><!-- Entrega el equipo -->
-                    <button name="action_draft" string="Volver a Borrador" type="object" if="state in ['repair', 'scrapped', 'delivered']"/><!-- Vuelve a estado borrador -->
-                    <button name="action_create_estimate" string="Crear Presupuesto" type="object" class="oe_highlight"/><!-- Crea presupuesto asociado -->
+                    <field name="state" widget="statusbar" statusbar_visible="draft,repair,scrapped,delivered"/>
+                    <button name="action_confirm_repair" string="Confirmar Reparación" type="object" class="oe_highlight" if="state == 'draft'"/>
+                    <button name="action_scrap" string="Dar de Baja" type="object" class="oe_highlight" if="state in ['draft', 'repair']"/>
+                    <button name="action_deliver" string="Entregar" type="object" class="oe_highlight" if="state in ['draft', 'repair']"/>
+                    <button name="action_draft" string="Volver a Borrador" type="object" if="state in ['repair', 'scrapped', 'delivered']"/>
+                    <button name="action_create_estimate" string="Crear Presupuesto" type="object" class="oe_highlight"/>
                 </header>
                 <sheet>
-                    <!-- Agrupación de campos principales -->
                     <group>
                         <group>
-                            <field name="name"/><!-- Referencia del equipo -->
-                            <field name="product_id"/><!-- Producto -->
-                            <field name="customer_id"/><!-- Cliente -->
-                            <field name="entry_date"/><!-- Fecha de ingreso -->
-                            <field name="delivery_date"/><!-- Fecha de entrega -->
+                            <field name="name"/>
+                            <field name="product_id"/>
+                            <field name="customer_id"/>
+                            <field name="entry_date"/>
+                            <field name="delivery_date"/>
                         </group>
                         <group>
-                            <field name="state" widget="statusbar"/><!-- Estado -->
-                            <field name="under_warranty" invisible="delivery_date == False"/><!-- Indicador de garantía -->
-                            <!-- Mensajes de alerta según garantía -->
+                            <field name="state" widget="statusbar"/>
+                            <field name="under_warranty" invisible="delivery_date == False"/>
                             <div class="alert alert-info" invisible="under_warranty == False" role="alert">
                                 Este equipo está en garantía
                             </div>
@@ -60,18 +48,17 @@ Cada sección está documentada para facilitar el mantenimiento y la comprensió
                             </div>
                         </group>
                     </group>
-                    <!-- Pestañas para descripción y presupuestos -->
                     <notebook>
                         <page string="Descripción">
-                            <field name="description"/><!-- Descripción del problema -->
+                            <field name="description"/>
                         </page>
                         <page string="Presupuestos">
                             <field name="estimate_ids" mode="list,form">
                                 <list>
-                                    <field name="name"/><!-- Cédula del propietario -->
-                                    <field name="date"/><!-- Fecha del presupuesto -->
-                                    <field name="state" widget="badge"/><!-- Estado del presupuesto -->
-                                    <field name="total_amount"/><!-- Total -->
+                                    <field name="name"/>
+                                    <field name="date"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="total_amount"/>
                                 </list>
                             </field>
                         </page>
@@ -81,41 +68,39 @@ Cada sección está documentada para facilitar el mantenimiento y la comprensió
         </field>
     </record>
 
-    <!-- Vista de búsqueda para filtrar equipos -->
+    <!-- Vista de búsqueda separada -->
     <record id="view_technical_service_equipment_search" model="ir.ui.view">
         <field name="name">technical.service.equipment.search</field>
         <field name="model">technical.service.equipment</field>
         <field name="arch" type="xml">
             <search string="Buscar Equipos">
-                <field name="name"/><!-- Referencia del equipo -->
-                <field name="product_id"/><!-- Producto -->
-                <field name="customer_id"/><!-- Cliente -->
-                <!-- Filtros por estado y garantía -->
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="customer_id"/>
                 <filter string="En Garantía" name="under_warranty" domain="[('under_warranty', '=', True)]"/>
                 <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="En Reparación" name="repair" domain="[('state', '=', 'repair')]"/>
                 <filter string="Entregados" name="delivered" domain="[('state', '=', 'delivered')]"/>
                 <filter string="Dados de Baja" name="scrapped" domain="[('state', '=', 'scrapped')]"/>
                 <group expand="1" string="Agrupar por">
-                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/><!-- Agrupar por estado -->
-                    <filter string="Garantía" name="group_by_warranty" context="{'group_by': 'under_warranty'}"/><!-- Agrupar por garantía -->
+                    <filter string="Estado" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Garantía" name="group_by_warranty" context="{'group_by': 'under_warranty'}"/>
                 </group>
             </search>
         </field>
     </record>
 
-    <!-- Acción para abrir la vista de equipos -->
+    <!-- Acción corregida sin el campo arch -->
     <record id="garantias_servicio.action_technical_service_equipment" model="ir.actions.act_window">
         <field name="name">technical.service.equipment.search</field>
         <field name="res_model">technical.service.equipment</field>
         <field name="search_view_id" ref="view_technical_service_equipment_search"/>
     </record>
 
-    <!-- Menú principal y acceso a equipos -->
+    <!-- Menús y acciones -->
     <menuitem id="menu_technical_service_root" name="Servicio Técnico" sequence="10"/>
     <menuitem id="menu_technical_service_equipment" name="Equipos" parent="menu_technical_service_root" action="garantias_servicio.action_technical_service_equipment"/>
 
-    <!-- Acción para abrir la vista de equipos de servicio técnico -->
     <record id="action_technical_service_equipment" model="ir.actions.act_window">
         <field name="name">Equipos de Servicio Técnico</field>
         <field name="res_model">technical.service.equipment</field>
