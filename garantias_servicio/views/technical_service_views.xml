@@ -3,7 +3,7 @@
         <field name="name">technical.service.equipment.list</field>
         <field name="model">technical.service.equipment</field>
         <field name="arch" type="xml">
-            <list string="Equipos de Servicio Técnico" decoration-info="under_warranty==True" decoration-danger="state=='scrapped'">
+            <list string="Equipos de Servicio Técnico">
                 <field name="name"/>
                 <field name="product_id"/>
                 <field name="customer_id"/>
@@ -11,6 +11,7 @@
                 <field name="delivery_date"/>
                 <field name="state" widget="badge"/>
                 <field name="under_warranty" invisible="1"/>
+                <field name="sale_order_count" widget="statinfo" string="Presupuestos"/>
             </list>
         </field>
     </record>
@@ -22,13 +23,22 @@
             <form string="Equipo de Servicio Técnico">
                 <header>
                     <field name="state" widget="statusbar" statusbar_visible="draft,repair,scrapped,delivered"/>
-                    <button name="action_confirm_repair" string="Confirmar Reparación" type="object" class="oe_highlight" if="state == 'draft'"/>
-                    <button name="action_scrap" string="Dar de Baja" type="object" class="oe_highlight" if="state in ['draft', 'repair']"/>
-                    <button name="action_deliver" string="Entregar" type="object" class="oe_highlight" if="state in ['draft', 'repair']"/>
-                    <button name="action_draft" string="Volver a Borrador" type="object" if="state in ['repair', 'scrapped', 'delivered']"/>
+                    <button name="action_confirm_repair" string="Confirmar Reparación" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <button name="action_scrap" string="Dar de Baja" type="object" class="oe_highlight" invisible="not state in ['draft', 'repair']"/>
+                    <button name="action_deliver" string="Entregar" type="object" class="oe_highlight" invisible="not state in ['draft', 'repair']"/>
+                    <button name="action_draft" string="Volver a Borrador" type="object" invisible="state not in ['repair', 'scrapped', 'delivered']"/>
                     <button name="action_create_estimate" string="Crear Presupuesto" type="object" class="oe_highlight"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button"
+                                name="action_view_sale_order"
+                                type="object"
+                                icon="fa-usd"
+                                help="Ver Presupuestos">
+                            <field name="sale_order_count" widget="statinfo" string="Presupuestos"/>
+                        </button>
+                    </div>
                     <group>
                         <group>
                             <field name="name"/>
@@ -36,14 +46,15 @@
                             <field name="customer_id"/>
                             <field name="entry_date"/>
                             <field name="delivery_date"/>
+                            <field name="sale_order_id" widget="many2one_button"/>
                         </group>
                         <group>
                             <field name="state" widget="statusbar"/>
-                            <field name="under_warranty" invisible="delivery_date == False"/>
-                            <div class="alert alert-info" invisible="under_warranty == False" role="alert">
+                            <field name="under_warranty" invisible="1"/>
+                            <div class="alert alert-info" role="alert" invisible="not under_warranty">
                                 Este equipo está en garantía
                             </div>
-                            <div class="alert alert-warning" invisible="under_warranty != False" role="alert">
+                            <div class="alert alert-warning" role="alert" invisible="under_warranty">
                                 Este equipo no está en garantía
                             </div>
                         </group>
@@ -52,15 +63,12 @@
                         <page string="Descripción">
                             <field name="description"/>
                         </page>
-                        <page string="Presupuestos">
-                            <field name="estimate_ids" mode="list,form">
-                                <list>
-                                    <field name="name"/>
-                                    <field name="date"/>
-                                    <field name="state" widget="badge"/>
-                                    <field name="total_amount"/>
-                                </list>
-                            </field>
+                        <page string="Presupuestos" invisible="sale_order_count == 0">
+                            <field name="sale_order_count" invisible="1"/>
+                            <tree>
+                                <field name="name"/>
+                                <field name="sale_order_count"/>
+                            </tree>
                         </page>
                     </notebook>
                 </sheet>
@@ -68,7 +76,6 @@
         </field>
     </record>
 
-    <!-- Vista de búsqueda separada -->
     <record id="view_technical_service_equipment_search" model="ir.ui.view">
         <field name="name">technical.service.equipment.search</field>
         <field name="model">technical.service.equipment</field>
@@ -77,6 +84,7 @@
                 <field name="name"/>
                 <field name="product_id"/>
                 <field name="customer_id"/>
+                <field name="sale_order_id"/>
                 <filter string="En Garantía" name="under_warranty" domain="[('under_warranty', '=', True)]"/>
                 <filter string="Borrador" name="draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="En Reparación" name="repair" domain="[('state', '=', 'repair')]"/>
@@ -90,25 +98,18 @@
         </field>
     </record>
 
-    <!-- Acción corregida sin el campo arch -->
-    <record id="garantias_servicio.action_technical_service_equipment" model="ir.actions.act_window">
-        <field name="name">technical.service.equipment.search</field>
-        <field name="res_model">technical.service.equipment</field>
-        <field name="search_view_id" ref="view_technical_service_equipment_search"/>
-    </record>
-
-    <!-- Menús y acciones -->
-    <menuitem id="menu_technical_service_root" name="Servicio Técnico" sequence="10"/>
-    <menuitem id="menu_technical_service_equipment" name="Equipos" parent="menu_technical_service_root" action="garantias_servicio.action_technical_service_equipment"/>
-
     <record id="action_technical_service_equipment" model="ir.actions.act_window">
         <field name="name">Equipos de Servicio Técnico</field>
         <field name="res_model">technical.service.equipment</field>
         <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_technical_service_equipment_search"/>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 No hay equipos registrados
             </p>
         </field>
     </record>
+
+    <menuitem id="menu_technical_service_root" name="Servicio Técnico" sequence="10"/>
+    <menuitem id="menu_technical_service_equipment" name="Equipos" parent="menu_technical_service_root" action="action_technical_service_equipment"/>
 </odoo>

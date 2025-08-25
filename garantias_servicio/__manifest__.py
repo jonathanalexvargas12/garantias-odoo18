@@ -12,7 +12,7 @@
     'depends': ['base', 'product', 'sale'],
     'data': [
         'views/technical_service_views.xml',
-        'views/service_estimate_views.xml',
+        #'views/service_estimate_views.xml',
         'security/ir.model.access.csv',
     ],
     'demo': [],

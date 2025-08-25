@@ -1,4 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_technical_service_equipment_user,access.technical.service.equipment.user,model_technical_service_equipment,base.group_user,1,1,1,1
-access_service_estimate_user,access.service.estimate.user,model_service_estimate,base.group_user,1,1,1,1
-access_service_estimate_line_user,access.service.estimate.line.user,model_service_estimate_line,base.group_user,1,1,1,1
